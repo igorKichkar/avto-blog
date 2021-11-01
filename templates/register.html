@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+{% for cat, msg in get_flashed_messages(True) %}
+<div>{{msg}}</div>
+{% endfor %}
+<div class="login col-10 col-sm-8 col-lg-4 alert alert-primary">
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>{{form.user_name1.label(class="form-label")}}
+       {{form.user_name1(class="form-control")}}
+    </p>
+    <p>{{form.email.label(class="form-label")}}
+       {{form.email(class="form-control")}}
+    </p>
+    <p>{{form.psw.label(class="form-label")}}
+       {{form.psw(class="form-control")}}
+    </p>
+    <p>{{form.psw1.label(class="form-label")}}
+       {{form.psw1(class="form-control")}}
+
+    </p>
+    <p>{{ form.submit(class="btn btn-primary") }}</p>
+
+</form>
+</div>
+{% endblock %}

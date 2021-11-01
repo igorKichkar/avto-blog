@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for i in posts[::-1] %}
+<div class='row'>
+    <div class="col-12 col-sm-10 col-lg-8 post">
+        <a class='title_post' href="{{ i.id }}">
+            <h3>{{ i.title }}</h3>
+        </a>
+        <br>
+        {% if i.content |length > 300 %}
+        <p>{{ i.content[:300] }}...</p>
+        {% else %}
+        <p>{{ i.content }}
+            {% endif %}
+        <p class='rightimg'>{{ i.views }} <img src="static/images/img/view.png"></p>
+        <p class='created_on'>{{ (i.created_on | string)[:16]}}</p>
+        {% if i.author == current_user %}
+
+        {% set edit_link = '/edit/' + i.id|string%}
+        <p><a class='btn btn-outline-primary' href="{{ edit_link }}">Редактировать</a></p>
+
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

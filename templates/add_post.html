@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row">
+  <div class='col-12 col-sm-10 col-lg-8'>
+    {% for cat, msg in get_flashed_messages(True) %}
+    <p class="alert alert-primary">{{ msg }}</p>
+    {% endfor %}
+  </div>
+  <div class="col-12 col-sm-10 col-lg-8 add_post post">
+    {% if autoriz %}
+    <form action="" method="post" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <p>{{form.title.label(class="form-label fw-bold")}}
+        {{form.title(class="form-control")}}
+      </p>
+      <p>{{form.content.label(class="form-label fw-bold")}}
+        {{form.content(class="form-control text_area_content")}}
+      </p>
+      {% if edit_post %}
+      <p class="fw-bold">{{form.checkbox.label(class="form-label")}}
+        {{ form.checkbox() }}
+        {% endif %}
+      <p>{{form.upload(class="btn upload_btn widht_btn")}}</p>
+
+      <p>{{ form.submit(class="btn btn-primary widht_btn") }}</p>
+      {% if edit_post %}
+      </p>
+      {% set del_post_link = '/delete_post/' + post_id %}
+      <a class="btn btn-danger widht_btn" href="{{ del_post_link }}">Удалить пост</a>
+      {% endif %}
+    </form>
+
+    {% if edit_post %}
+    {% if coments %}
+    <br>
+    <h5>Комментарии:</h5>
+    {% endif %}
+    <div class='row'>
+      {% for i in coments %}
+      <div class="col-12 comment">
+        <p class="coment_content">{{ i.user_name }}</p>
+        <p class='created_on'>{{ (i.created_on| string)[:16] }}</p>
+        <p>{{ i.coment_content }}</p>
+        {% set del_coment_link = '/delete_coment/' + i.id | string %}
+        <a class='btn btn-outline-danger' href="{{ del_coment_link }}">удалить</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+
+    {% else %}
+    <div>Чтобы добавить новую статью нужно авторизоваться</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

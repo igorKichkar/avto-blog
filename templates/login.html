@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="login col-10 col-sm-8 col-lg-4 alert alert-primary">
+        {% for cat, msg in get_flashed_messages(True) %}
+        <p class="alert alert-light">{{msg}}</p>
+        {% endfor %}
+        <p>Для входа в системму введите свои данные: </p>
+    
+    <form action="" method="post">
+        {{ form.csrf_token }}
+        <p>
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control") }}
+            {% if form.email.errors %}
+            {% for error in form.email.errors %}
+            {{ error }}
+            {% endfor %}
+            {% endif %}
+        </p>
+        <p>
+            {{ form.psw.label(class="form-label") }}
+            {{ form.psw(class="form-control") }}
+            {% if form.psw.errors %}
+            {% for error in form.psw.errors %}
+            {{ error }}
+            {% endfor %}
+            {% endif %}
+        </p>
+        <p>
+            {{ form.remember.label(class="form-label") }}
+            {{ form.remember(class="form-check-label") }}
+        </p>
+        <p>
+            {{ form.submit(class="btn btn-primary") }}
+        </p>
+    </form>
+</div>
+</div>
+{% endblock %}

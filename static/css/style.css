@@ -1,0 +1,115 @@
+.coment{
+    border: 2px solid rgb(197, 197, 197);
+    margin: 10px;
+    padding: 5px;
+}
+
+.add_favorite{
+    color: red;
+}
+.login{
+    margin-top: 15px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.upload_btn{
+    background-color: rgb(255, 255, 255);
+    margin-left: -12px;
+}
+
+.text_area_content{
+    height: 150px;
+}
+
+.widht_btn{
+    width: 310px;
+}
+
+
+.post{
+    border-radius: 5px;
+    border: 1px solid rgb(216, 216, 216);
+    margin: 10px auto 0 auto;
+    padding-top: 5px;
+}
+
+.title_post{
+    color:rgba(0, 0, 0, 0.747);
+    text-decoration:none ;
+}
+
+.title_post:hover{
+    color:black;
+}
+
+.redact_post:hover{
+    color:black;
+}
+
+.redact_post{
+    color:rgba(0, 0, 0, 0.384);
+    text-decoration:none ;
+}
+
+.add_post{
+    margin: 20px auto 0 auto;
+}
+
+.like{
+    fill: rgb(121, 117, 117)
+}
+
+.leftimg  {
+    float: left; 
+    margin: 0 7px 0 0; 
+}
+
+.rightimg {
+    float: right; 
+    margin: 0 7px 0 0; 
+}
+
+.created_on{
+    font-size: 85%;
+    font-style: italic;
+    color: rgb(180, 180, 180);
+
+}
+
+.comment{
+    
+   
+    border-top: 1px solid rgb(216, 216, 216);
+    margin-top: 5px;
+    margin: 5px 0 0 0 ;
+}
+
+.coment_content{
+    font-weight: bolder;;
+}
+.alert_margin{
+    padding-top: 115px;
+}
+
+[data-tooltip] {
+    position: relative; /* Относительное позиционирование */ 
+   }
+   [data-tooltip]::after {
+    content: attr(data-tooltip); /* Выводим текст */
+    position: absolute; /* Абсолютное позиционирование */
+    width: 300px; /* Ширина подсказки */
+    left: 0; top: 0; /* Положение подсказки */
+    background: #3989c9; /* Синий цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 0.5em; /* Поля вокруг текста */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Параметры тени */
+    pointer-events: none; /* Подсказка */
+    opacity: 0; /* Подсказка невидима */
+    transition: .5s; /* Время появления подсказки */
+    border-radius: 5px;
+   } 
+   [data-tooltip]:hover::after {
+    opacity: 1; /* Показываем подсказку */
+    top: 2em; /*/* Выводим текст */
+  }

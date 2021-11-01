@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css">
+    <title>BLOG</title>
+</head>
+
+<body>
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('main') }}"><span>BLOG</span> </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+                    aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarText">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{{ url_for('main') }}">Главная</a>
+                        </li>
+                        {% if autoriz %}
+                        {% set link_add_post = url_for('add_post') %}
+                        {% set link_favorites = url_for('favorites_posts') %}
+                        {% else %}
+                        {% set link_add_post = url_for('login') %}
+                        {% set link_favorites = url_for('login') %}
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ link_add_post }}">Добавить пост</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ link_favorites }}">Избранное</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav  justify-content-end">
+
+                        {% if not autoriz %}
+                        <li class="nav-item justify-content-end">
+                            <a class="nav-link" href="{{ url_for('login') }}">Войти</a>
+                        </li>
+                        <li class="nav-item justify-content-end">
+                            <a class="nav-link" href="{{ url_for('register') }}">Регистрация</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item justify-content-end">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Выйти из профиля</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class='container'>
+        {% block content %}
+        {% endblock %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
