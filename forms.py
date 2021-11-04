@@ -17,7 +17,7 @@ class ComentForm(FlaskForm):
     submit = SubmitField("Опубликовать")
 
 class RegistrForm(FlaskForm):
-    user_name1 = StringField("Ваше имя* ", validators=[DataRequired()])
+    user_name = StringField("Ваше имя* ", validators=[DataRequired()])
     email = StringField("Email* ", validators=[Email()])
     psw = PasswordField("Пароль* ", validators=[DataRequired()])
     psw1 = PasswordField("Повторите пароль* ", validators=[DataRequired()])

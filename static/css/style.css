@@ -111,5 +111,13 @@
    } 
    [data-tooltip]:hover::after {
     opacity: 1; /* Показываем подсказку */
-    top: 2em; /*/* Выводим текст */
+    top: 2em; /*/* Выводим текст.  */
+  }
+
+  .admin_panel_btn{
+      width: 310px;
+  }
+
+  .admin_panel_block{
+      padding: 20px;
   }

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class='col-12 col-sm-10 col-lg-8'>
+        {% for i in users %}
+        <div class='post admin_panel_block'>
+            <p class="fw-bold">{{ i.user_name }}</p>
+            <p class="fw-bold">{{ i.email }}</p>
+            <p class='fst-italic'>Статус пользователя: <span class="fst-normal fw-bold">{{ i.status }}</span> </p>
+            <p class='fst-italic'>Зарегистрирован: <span class="fst-normal fw-bold">{{ (i.date|string)[:16] }}</span>
+            </p>
+            {% if i.status == 'admin' %}
+            {% if i.email == current_user %}
+            <p><a class="btn btn-outline-danger admin_panel_btn"
+                    href="{{ url_for('admin_panel', user_id=i.id) }}">Отказаться от прав администратора</a></p>
+            {% else %}
+            <p><a class="btn btn-outline-warning admin_panel_btn"
+                    href="{{ url_for('admin_panel', user_id=i.id) }}">Лишить прав администратора</a></p>
+            {%endif%}
+            {% else %}
+            <p><a class="btn btn-outline-success admin_panel_btn" href="{{ url_for('admin_panel', user_id=i.id) }}">Дать
+                    права администратора</a></p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

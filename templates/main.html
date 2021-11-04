@@ -16,11 +16,9 @@
             {% endif %}
         <p class='rightimg'>{{ i.views }} <img src="static/images/img/view.png"></p>
         <p class='created_on'>{{ (i.created_on | string)[:16]}}</p>
-        {% if i.author == current_user %}
-
-        {% set edit_link = '/edit/' + i.id|string%}
+        {% if user_status == 'admin' or i.author == current_user %}
+        {% set edit_link = '/edit/' + i.id|string %}
         <p><a class='btn btn-outline-primary' href="{{ edit_link }}">Редактировать</a></p>
-
         {% endif %}
     </div>
 </div>

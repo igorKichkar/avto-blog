@@ -54,9 +54,10 @@ class Coment(db.Model):
 
 class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    user_name1 = db.Column(db.String(500), nullable=False)
+    user_name = db.Column(db.String(500), nullable=False)
     email = db.Column(db.String(50), unique=True)
     psw = db.Column(db.String(500), nullable=False)
+    status = db.Column(db.String(50), nullable=False, default='user')
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
@@ -74,11 +75,16 @@ class Favorites(db.Model):
 @app.route('/')
 @app.route('/<int:post_id>', methods=['get', 'post'])
 def main(post_id=None):
+    if current_user.is_authenticated:
+        user_status = str(current_user.status)
+    else:
+        user_status = None
     if not post_id:
-        return render_template('main.html', 
+        return render_template('main.html',
+                                user_status=user_status, 
                                 posts=Post.query.all(), 
                                 autoriz=current_user.is_authenticated,
-                                current_user = str(current_user),)
+                                current_user=str(current_user),)
     else:
         post_dir = 'static/images'+ '/' + str(post_id)
         count_favorite = len(db.session.query(Favorites).filter(Favorites.post_id==post_id).all())
@@ -100,7 +106,7 @@ def main(post_id=None):
         form = ComentForm()
         if form.validate_on_submit():               # добавление комментария к посту
             try:
-                com = Coment(user_name=current_user.user_name1,
+                com = Coment(user_name=current_user.user_name,
                              coment_content=request.form['coment_content'],
                              post_id=post_id, )
                 viwe = Post.query.get(post_id)
@@ -108,6 +114,7 @@ def main(post_id=None):
                 db.session.add(viwe)
                 db.session.add(com)
                 db.session.commit()
+                flash("Комментарий добавлен")
             except:
                 db.session.rollback()
                 flash("Ошибка добавления")
@@ -122,6 +129,7 @@ def main(post_id=None):
                                autoriz=current_user.is_authenticated,
                                count_favorite=count_favorite,
                                user_favorite=user_favorite,
+                               user_status=user_status,
                                current_user = str(current_user),)
 
 
@@ -135,13 +143,14 @@ def favorites_posts():
     return render_template('main.html', 
                             posts=posts, 
                             autoriz=current_user.is_authenticated,
-                            current_user = str(current_user),)
+                            current_user = str(current_user),
+                            user_status=str(current_user.status),)
 
 @app.route('/add-post/', methods=['get', 'post'])
 def add_post():
     flag = False
     form = PostForm()
-    if form.validate_on_submit():     # Добавление  поста в БД
+    if form.validate_on_submit():     # обавление  поста в БД
         try:
             p = Post(title=request.form['title'],
                      content=request.form['content'],
@@ -167,7 +176,8 @@ def add_post():
     return render_template('add_post.html',
                            form=form,
                            edit_post=False,
-                           autoriz=current_user.is_authenticated, )
+                           autoriz=current_user.is_authenticated,
+                           user_status=str(current_user.status), )
 
 @app.route("/edit/<string:post_id>", methods=['get', 'post'])
 def edit(post_id):
@@ -208,7 +218,8 @@ def edit(post_id):
                            post_id=str(post_id),
                            edit_post=True,
                            coments=Coment.query.filter(Coment.post_id == post_id).all(),
-                           autoriz=current_user.is_authenticated, )
+                           autoriz=current_user.is_authenticated, 
+                           user_status=str(current_user.status),)
 
 
 @app.route('/delete_post/<int:post_id>')
@@ -284,7 +295,7 @@ def register():
         if request.form['psw'] == request.form['psw1']: # проверка совпадения паролей при регистрации
             try:
                 hash = generate_password_hash(request.form['psw']) 
-                u = Users(user_name1=request.form['user_name1'],
+                u = Users(user_name=request.form['user_name'],
                           email=request.form['email'],
                           psw=hash, )
                 db.session.add(u)
@@ -324,6 +335,34 @@ def logout():
     logout_user()
     flash("Вы вышли из профиля")
     return redirect(url_for('login'))
+
+@app.route('/admin-panel/<int:user_id>')
+@app.route('/admin-panel/')
+def admin_panel(user_id = None):
+    if user_id:
+        user = db.session.query(Users).filter(Users.id==user_id).first()
+        print(user.status)
+        if user.status == 'admin':
+            user.status = 'user'
+        else:
+            user.status = 'admin'
+        try: 
+            db.session.add(user)
+            db.session.commit()
+        except:
+            db.session.rollback()
+            flash("Ошибка")
+        if current_user.id == user_id:
+            return redirect(url_for('main'))
+        else:
+            return redirect(url_for('admin_panel'))
+    else:    
+        return render_template('admin_panel.html',
+                            users = Users.query.all(),
+                            current_user=str(current_user),
+                            user_status=str(current_user.status),
+                            autoriz=current_user.is_authenticated,
+                            )
 
 
 if __name__ == "__main__":
