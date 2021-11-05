@@ -1,12 +1,13 @@
 import os
 import glob
-import shutil
-from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
+import shutil
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import PostForm, ComentForm, RegistrForm, LoginForm
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+
 
 
 app = Flask(__name__)
@@ -146,6 +147,7 @@ def favorites_posts():
                             current_user = str(current_user),
                             user_status=str(current_user.status),)
 
+
 @app.route('/add-post/', methods=['get', 'post'])
 def add_post():
     flag = False
@@ -179,13 +181,18 @@ def add_post():
                            autoriz=current_user.is_authenticated,
                            user_status=str(current_user.status), )
 
+
 @app.route("/edit/<string:post_id>", methods=['get', 'post'])
 def edit(post_id):
     flag = False
-    post_dir = '/' + str(Post.query.filter(Post.id == post_id).first().id)
+    post_dir = '/' + post_id
     form = PostForm()
     form.title.data = Post.query.filter(Post.id == post_id).first().title
     form.content.data = Post.query.filter(Post.id == post_id).first().content
+    if (os.path.exists('static/images'+ '/' + post_id)):  # получение списка изображений для конкретного поста
+        images = os.listdir('static/images'+ '/' + post_id)
+    else:
+        images = []
     if form.validate_on_submit():
         try:
             post = Post.query.get(post_id)
@@ -201,7 +208,6 @@ def edit(post_id):
         if form.checkbox.data and os.path.exists('static/images' + post_dir):       # удаление прежних изобр. 
                     del_files = glob.glob('static/images' + post_dir + '/*')        # при редактировании поста
                     for f in del_files:
-                        print(f)
                         os.remove(f)
         if flag:        # если пост обновился, создаются каталоги (если их нет) и в них грузятся изображения для постов
             files = request.files.getlist('upload')
@@ -215,11 +221,12 @@ def edit(post_id):
         return redirect(f'/{post_id}')
     return render_template('add_post.html',
                            form=form,
-                           post_id=str(post_id),
+                           post_id=post_id,
                            edit_post=True,
                            coments=Coment.query.filter(Coment.post_id == post_id).all(),
                            autoriz=current_user.is_authenticated, 
-                           user_status=str(current_user.status),)
+                           user_status=str(current_user.status),
+                           images=images,)
 
 
 @app.route('/delete_post/<int:post_id>')
@@ -247,6 +254,7 @@ def delete_post(post_id):
             flash("Ошибка: {} : {}".format(dir_path, e.strerror))
     return redirect(url_for('main'))
 
+
 @app.route('/delete_coment/<int:coment_id>')
 def delete_coment(coment_id):
     edit_post = db.session.query(Coment).filter(Coment.id==int(coment_id)).one().post_id
@@ -258,6 +266,16 @@ def delete_coment(coment_id):
         db.session.rollback()
         flash("Ошибка удаления")
     return redirect(url_for('edit', post_id = edit_post))
+
+
+@app.route('/delete_img/<path:img>') # удаление конкретного изображения при редактировании поста 
+def delete_img(img):
+    path = img.split('/')     
+    del_file = 'static/images' + '/' + path[0] + '/' + path[1]
+    print(del_file)        
+    os.remove(del_file)
+
+    return redirect(url_for('edit', post_id=path[0]))
 
 
 @app.route('/favorites/<int:post_id>')
@@ -285,7 +303,6 @@ def favorites(post_id):
         except:
             db.session.rollback()
     return redirect(url_for('main', post_id = post_id))
-
 
 
 @app.route("/register/", methods=("POST", "GET"))
@@ -336,6 +353,7 @@ def logout():
     flash("Вы вышли из профиля")
     return redirect(url_for('login'))
 
+
 @app.route('/admin-panel/<int:user_id>')
 @app.route('/admin-panel/')
 def admin_panel(user_id = None):
@@ -361,9 +379,7 @@ def admin_panel(user_id = None):
                             users = Users.query.all(),
                             current_user=str(current_user),
                             user_status=str(current_user.status),
-                            autoriz=current_user.is_authenticated,
-                            )
-
+                            autoriz=current_user.is_authenticated,)
 
 if __name__ == "__main__":
     app.run(debug=True)

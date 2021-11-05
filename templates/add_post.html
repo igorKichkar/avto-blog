@@ -18,11 +18,19 @@
         {{form.content(class="form-control text_area_content")}}
       </p>
       {% if edit_post %}
-      <p class="fw-bold">{{form.checkbox.label(class="form-label")}}
-        {{ form.checkbox() }}
+      {% for i in images %}
+      {% set img = 'images/' + post_id + '/' + i %}
+      <div>
+      <img class='edit_img' src="{{url_for('static', filename=img)}}" alt="">
+      <a class="btn btn-outline-danger" href="{{ url_for('delete_img', img=post_id + '/' +i) }}">Удалить</a>
+      </div>
+      {% endfor %}
+        {% if images %}
+        <p class="fw-bold">{{form.checkbox.label(class="form-label")}}
+          {{ form.checkbox() }}
+        {% endif %}
         {% endif %}
       <p>{{form.upload(class="btn upload_btn widht_btn")}}</p>
-
       <p>{{ form.submit(class="btn btn-primary widht_btn") }}</p>
       {% if edit_post %}
       </p>
@@ -48,8 +56,6 @@
       {% endfor %}
     </div>
     {% endif %}
-
-
     {% else %}
     <div>Чтобы добавить новую статью нужно авторизоваться</div>
     {% endif %}

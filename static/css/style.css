@@ -121,3 +121,8 @@
   .admin_panel_block{
       padding: 20px;
   }
+
+  .edit_img{
+      width: 250px;
+      padding: 10px;
+  }

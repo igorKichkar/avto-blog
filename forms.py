@@ -8,7 +8,7 @@ class PostForm(FlaskForm):
     title = StringField("Название: ", validators=[DataRequired()])
     content = TextAreaField("Содержание: ", validators=[DataRequired()])
     upload = MultipleFileField('Изображения добавлены')
-    checkbox = BooleanField("Удалить прежние фото к этому посту?")
+    checkbox = BooleanField("Удалить все прежние фото?")
     submit = SubmitField("Опубликовать")
     
 
