@@ -21,14 +21,16 @@
       {% for i in images %}
       {% set img = 'images/' + post_id + '/' + i %}
       <div>
-      <img class='edit_img' src="{{url_for('static', filename=img)}}" alt="">
-      <a class="btn btn-outline-danger" href="{{ url_for('delete_img', img=post_id + '/' +i) }}">Удалить</a>
+        <img class='edit_img' src="{{url_for('static', filename=img)}}" alt="">
+        <a class="btn btn-outline-danger" href="{{ url_for('delete_img', img=post_id + '/' + i) }}">Удалить</a>
       </div>
       {% endfor %}
-        {% if images %}
-        <p class="fw-bold">{{form.checkbox.label(class="form-label")}}
-          {{ form.checkbox() }}
-        {% endif %}
+      {% for i in links_img %}
+        <div>
+          <img class='edit_img' src="{{i.link}}" alt="">
+          <a class="btn btn-outline-danger" href="{{ url_for('delete_img', img=post_id + '/' + i.id|string + '/'+ 'link') }}">Удалить</a>
+        </div>
+      {% endfor %}
         {% endif %}
       <p>{{form.upload(class="btn upload_btn widht_btn")}}</p>
       <p>{{ form.submit(class="btn btn-primary widht_btn") }}</p>

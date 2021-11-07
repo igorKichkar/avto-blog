@@ -36,9 +36,12 @@
     <div class='rightimg'>{{ post.views }} <img src="static/images/img/view.png"></div>
     <h3>{{ post.title }}</h3>
     <p>{{ post.content }}</p>
-    {% if images|length > 1 %}
+    <!-- карусель изображений -->
+    {% if images|length + links_img|length > 1%}
     <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
       <div class="carousel-inner comment">
+        <!--первыми грузятся статические изображения, затем ссылки на изображения-->
+        {% if images %}
         {% for i in images %}
         {% set img = 'images/' + directory + '/' + i %}
         {%if i == images[0] %}
@@ -51,46 +54,73 @@
         </div>
         {% endif %}
         {% endfor %}
+        <!--добавление изображений из таблицы ссылок-->
+        {% for i in links_img%}
+        <div class="carousel-item">
+          <img src="{{ i.link }}" class="d-block w-100">
+        </div>
+        {% endfor %}
+        <!--если отсуствуют статические изображения, то в карусель грузятся только ссылки на изображения-->
+        {% elif not images and links_img %}
+        <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner comment">
+            {% for i in links_img %}
+            {%if i == links_img[0] %}
+            <div class="carousel-item active">
+              <img src="{{i.link}}" class="d-block w-100">
+            </div>
+            {%else%}
+            <div class="carousel-item">
+              <img src="{{i.link}}" class="d-block w-100">
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls"
+            data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Предыдущий</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls"
+            data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Следующий</span>
+          </button>
+        </div>
+        <!--если пост имеет только одно изображение, то карусель не подключается-->
+        {% elif images%}
+        {% set img = 'images/' + directory + '/' + images[0] %}
+        <img src="{{url_for('static', filename=img)}}" class="d-block w-100">
+
+        {% elif links_img %}
+        <img src="{{ links_img[0].link }}" class="d-block w-100">
+        {% endif %}
+        <!--конец блока карусели-->
+        <br>
+        {% if autoriz %}
+        <div>
+          <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <p>{{form.coment_content.label(class="form-label")}}{{form.coment_content(class="form-control")}}</p>
+            <p>{{ form.submit(class="btn btn-primary")}}</p>
+          </form>
+        </div>
+        {% else %}
+        <p class='created_on'>Что бы оставить комментарий нужно авторизоваться</p>
+        {% endif %}
+        {% if coments %}
+        <h5>Комментарии:</h5>
+        {% endif %}
+        <div class='row'>
+          {% for i in coments %}
+          <div class="col-12 comment">
+            <p class="coment_content">{{ i.user_name }}</p>
+            <p class='created_on'>{{ (i.created_on| string)[:16] }}</p>
+            <p>{{ i.coment_content }}</p>
+          </div>
+          {% endfor %}
+        </div>
       </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls"
-        data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Предыдущий</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls"
-        data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Следующий</span>
-      </button>
     </div>
-    {% elif images%}
-    {% set img = 'images/' + directory + '/' + images[0] %}
-    <img src="{{url_for('static', filename=img)}}" class="d-block w-100">
-    {% endif %}
-    <br>
-    {% if autoriz %}
-    <div>
-      <form action="" method="post">
-        {{ form.hidden_tag() }}
-        <p>{{form.coment_content.label(class="form-label")}}{{form.coment_content(class="form-control")}}</p>
-        <p>{{ form.submit(class="btn btn-primary")}}</p>
-      </form>
-    </div>
-    {% else %}
-    <p class='created_on'>Что бы оставить комментарий нужно авторизоваться</p>
-    {% endif %}
-    {% if coments %}
-    <h5>Комментарии:</h5>
-    {% endif %}
-    <div class='row'>
-      {% for i in coments %}
-      <div class="col-12 comment">
-        <p class="coment_content">{{ i.user_name }}</p>
-        <p class='created_on'>{{ (i.created_on| string)[:16] }}</p>
-        <p>{{ i.coment_content }}</p>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</div>
-{% endblock %}
+    {% endblock %}

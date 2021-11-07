@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import PostForm, ComentForm, RegistrForm, LoginForm
-
+from create_random_post import create_random_post
 
 
 app = Flask(__name__)
@@ -69,6 +69,11 @@ class Favorites(db.Model):
     user_email = db.Column(db.String(255), nullable=False)
     post_id = db.Column(db.Integer(), nullable=False)
 
+class Link_img(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    link = db.Column(db.String(255), nullable=False)
+    post_id = db.Column(db.Integer(), nullable=False)
+
     def __repr__(self):
         return f'{self.id}'
 
@@ -88,6 +93,7 @@ def main(post_id=None):
                                 current_user=str(current_user),)
     else:
         post_dir = 'static/images'+ '/' + str(post_id)
+        links_img = db.session.query(Link_img).filter(Link_img.post_id==post_id).all()
         count_favorite = len(db.session.query(Favorites).filter(Favorites.post_id==post_id).all())
         user_favorite = db.session.query(Favorites).filter(Favorites.post_id==post_id,
                         Favorites.user_email==str(current_user)).all()
@@ -127,6 +133,7 @@ def main(post_id=None):
                                form=form,
                                directory=str(post_id),
                                images=images,
+                               links_img=links_img,
                                autoriz=current_user.is_authenticated,
                                count_favorite=count_favorite,
                                user_favorite=user_favorite,
@@ -149,22 +156,43 @@ def favorites_posts():
 
 
 @app.route('/add-post/', methods=['get', 'post'])
-def add_post():
+@app.route('/add-post/<string:slug>')
+def add_post(slug=None):
     flag = False
     form = PostForm()
-    if form.validate_on_submit():     # обавление  поста в БД
+    if slug == 'random':
+        data_post = create_random_post()
         try:
-            p = Post(title=request.form['title'],
-                     content=request.form['content'],
-                     author=str(current_user), )
+            p = Post(title=data_post[0],
+                    content=data_post[1],
+                    author=str(current_user), )
             db.session.add(p)
             db.session.commit()
-            flag = True
+            if data_post[2]:
+                for i in data_post[2]:
+                    l = Link_img(link=i,
+                                 post_id=Post.query.order_by(Post.id.desc())[0].id)
+                    db.session.add(l)
+                    db.session.commit()
             flash("Статья добавлена")
         except:
             db.session.rollback()
             flash("Ошибка добавления")
-            return redirect(url_for('add_post'))
+        return redirect(f'/{str(Post.query.order_by(Post.id.desc())[0].id)}')
+    else:
+        if form.validate_on_submit():     # обавление  поста в БД
+            try:
+                p = Post(title=request.form['title'],
+                        content=request.form['content'],
+                        author=str(current_user), )
+                db.session.add(p)
+                db.session.commit()
+                flag = True
+                flash("Статья добавлена")
+            except:
+                db.session.rollback()
+                flash("Ошибка добавления")
+                return redirect(url_for('add_post'))
         if flag:        # если данные в БД добавились, создаются каталоги и в них грузятся изображения для постов
             files = request.files.getlist('upload')
             if files[0]:
@@ -174,7 +202,7 @@ def add_post():
                 for file in files:
                         filename = file.filename
                         file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
-        return redirect(f'/{str(p.id)}')
+            return redirect(f'/{str(Post.query.order_by(Post.id.desc())[0].id)}')
     return render_template('add_post.html',
                            form=form,
                            edit_post=False,
@@ -185,6 +213,7 @@ def add_post():
 @app.route("/edit/<string:post_id>", methods=['get', 'post'])
 def edit(post_id):
     flag = False
+    links_img = db.session.query(Link_img).filter(Link_img.post_id==int(post_id)).all()
     post_dir = '/' + post_id
     form = PostForm()
     form.title.data = Post.query.filter(Post.id == post_id).first().title
@@ -226,7 +255,8 @@ def edit(post_id):
                            coments=Coment.query.filter(Coment.post_id == post_id).all(),
                            autoriz=current_user.is_authenticated, 
                            user_status=str(current_user.status),
-                           images=images,)
+                           images=images,
+                           links_img=links_img,)
 
 
 @app.route('/delete_post/<int:post_id>')
@@ -235,10 +265,13 @@ def delete_post(post_id):
     favorit = db.session.query(Favorites).filter(Favorites.post_id==post_id).all()
     row_to_delete = db.session.query(Post).filter(Post.id==int(post_id)).one()
     coment_rows_delete = db.session.query(Coment).filter(Coment.post_id==post_id).all()
+    links_img = db.session.query(Link_img).filter(Link_img.post_id==post_id).all()
     try:
         for i in coment_rows_delete:
             db.session.delete(i)
         for i in favorit:
+            db.session.delete(i)
+        for i in links_img:
             db.session.delete(i)
         db.session.delete(row_to_delete)
         db.session.commit()
@@ -270,10 +303,18 @@ def delete_coment(coment_id):
 
 @app.route('/delete_img/<path:img>') # удаление конкретного изображения при редактировании поста 
 def delete_img(img):
-    path = img.split('/')     
-    del_file = 'static/images' + '/' + path[0] + '/' + path[1]
-    print(del_file)        
-    os.remove(del_file)
+    path = img.split('/')
+    if len(path) == 3 and path[2] == 'link': # удаление ссылки на изображение
+        row_to_delete = db.session.query(Link_img).filter(Link_img.id==int(path[1])).one()
+        try:   
+            db.session.delete(row_to_delete)
+            db.session.commit()
+        except:
+            db.session.rollback()
+            flash("Ошибка удаления")
+    else:                          # удаление статического изображения
+        del_file = 'static/images' + '/' + path[0] + '/' + path[1]       
+        os.remove(del_file)
 
     return redirect(url_for('edit', post_id=path[0]))
 
@@ -380,6 +421,7 @@ def admin_panel(user_id = None):
                             current_user=str(current_user),
                             user_status=str(current_user.status),
                             autoriz=current_user.is_authenticated,)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

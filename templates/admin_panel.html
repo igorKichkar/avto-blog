@@ -3,6 +3,8 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class='col-12 col-sm-10 col-lg-8'>
+        <br>
+        <a class="btn btn-primary admin_panel_btn" href="{{url_for('add_post', slug='random')}}"> Добавить случайную статью с википедии </a>
         {% for i in users %}
         <div class='post admin_panel_block'>
             <p class="fw-bold">{{ i.user_name }}</p>
