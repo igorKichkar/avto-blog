@@ -166,24 +166,23 @@ def add_post(slug=None):
     flag = False
     form = PostForm()
     if slug == 'random':
-        for i in range(100):
-            data_post = create_random_post() # добавление случайной статьи с википедии
-            try:
-                p = Post(title=data_post[0],
-                        content=data_post[1],
-                        author=str(current_user), )
-                db.session.add(p)
-                db.session.commit()
-                if data_post[2]:
-                    for i in data_post[2]:
-                        l = Link_img(link=i,
-                                    post_id=Post.query.order_by(Post.id.desc())[0].id)
-                        db.session.add(l)
-                        db.session.commit()
-                flash("Статья добавлена")
-            except:
-                db.session.rollback()
-                flash("Ошибка добавления")
+        data_post = create_random_post() # добавление случайной статьи с википедии
+        try:
+            p = Post(title=data_post[0],
+                    content=data_post[1],
+                    author=str(current_user), )
+            db.session.add(p)
+            db.session.commit()
+            if data_post[2]:
+                for i in data_post[2]:
+                    l = Link_img(link=i,
+                                post_id=Post.query.order_by(Post.id.desc())[0].id)
+                    db.session.add(l)
+                    db.session.commit()
+            flash("Статья добавлена")
+        except:
+            db.session.rollback()
+            flash("Ошибка добавления")
         return redirect(f'/post/{str(Post.query.order_by(Post.id.desc())[0].id)}')
     else:
         if form.validate_on_submit():     # обавление  поста в БД
