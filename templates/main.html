@@ -1,53 +1,72 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class='row'>
+  <div class="col-12 col-sm-10 col-lg-8 sort">
+    <div class="dropdown">
+      <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Сортировать по дате публикации
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        {% if favorites %}
+        <li><a class="dropdown-item" href="{{ url_for('sort_posts', slug='increase-favorites') }}">Сначало старые</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('sort_posts', slug='decrease-favorites') }}">Новые</a></li>
+        {% else %}
+        <li><a class="dropdown-item" href="{{ url_for('sort_posts', slug='increase-main') }}">Сначало старые</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('sort_posts', slug='decrease-main') }}">Новые</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
 
 {% for i in posts.items %}
 <div class='row'>
-    <div class="col-12 col-sm-10 col-lg-8 post">
-        <a class='title_post' href="{{ url_for('post', post_id=i.id) }}">
-            <h3>{{ i.title }}</h3>
-        </a>
-        <br>
-        {% if i.content |length > 300 %}
-        <p>{{ i.content[:300] }}...</p>
-        {% else %}
-        <p>{{ i.content }}
-            {% endif %}
-        <p class='rightimg'>{{ i.views }} <img src="{{url_for('static', filename='/images/img/view.png')}}"></p>
-        <p class='created_on'>{{ (i.created_on | string)[:16]}}</p>
-        {% if user_status == 'admin' or i.author == current_user %}
-        {% set edit_link = '/edit/' + i.id|string %}
-        <p><a class='btn btn-outline-primary' href="{{ edit_link }}">Редактировать</a></p>
-        {% endif %}
-    </div>
+  <div class="col-12 col-sm-10 col-lg-8 post">
+    <a class='title_post' href="{{ url_for('post', post_id=i.id) }}">
+      <h3>{{ i.title }}</h3>
+    </a>
+    <br>
+    {% if i.content |length > 300 %}
+    <p>{{ i.content[:300] }}...</p>
+    {% else %}
+    <p>{{ i.content }}
+      {% endif %}
+    <p class='rightimg'>{{ i.views }} <img src="{{url_for('static', filename='/images/img/view.png')}}"></p>
+    <p class='created_on'>{{ (i.created_on | string)[:16]}}</p>
+    {% if user_status == 'admin' or i.author == current_user %}
+    {% set edit_link = '/edit/' + i.id|string %}
+    <p><a class='btn btn-outline-primary' href="{{ edit_link }}">Редактировать</a></p>
+    {% endif %}
+  </div>
 </div>
 {% endfor %}
-    {% if favorites %}
-    {% set endpoint = 'favorites_posts' %}
-    {% else %}
-    {% set endpoint = 'main' %}
-    {% endif %}
+{% if favorites %}
+{% set endpoint = 'favorites_posts' %}
+{% else %}
+{% set endpoint = 'main' %}
+{% endif %}
 <nav aria-label="Page navigation example">
-    <ul class="pagination justify-content-center">
-      {% if posts.has_prev %}
-      <li class="page-item">
-        <a class="page-link" href="{{ url_for(endpoint, page=posts.prev_num) }}" tabindex="-1">Назад</a>
-      </li>
-      {% else %}
-      <li class="page-item disabled">
-        <a class="page-link" href="#" tabindex="-1">Назад</a>
-      </li>
-      {% endif %}
-      {% if posts.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="{{ url_for(endpoint, page=posts.next_num) }}">Загрузить еще</a>
-      </li>
-      {% else %}
-      <li class="page-item disabled">
-        <a class="page-link" href="#">Загрузить еще</a>
-      </li>
-      {% endif %}
-    </ul>
-  </nav>
+  <ul class="pagination justify-content-center">
+    {% if posts.has_prev %}
+    <li class="page-item">
+      <a class="page-link" href="{{ url_for(endpoint, page=posts.prev_num) }}" tabindex="-1">Назад</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled">
+      <a class="page-link" href="#" tabindex="-1">Назад</a>
+    </li>
+    {% endif %}
+    {% if posts.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="{{ url_for(endpoint, page=posts.next_num) }}">Загрузить еще</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled">
+      <a class="page-link" href="#">Загрузить еще</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
 {% endblock %}

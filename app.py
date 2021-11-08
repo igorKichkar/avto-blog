@@ -2,7 +2,7 @@ import os
 import glob
 from datetime import datetime
 import shutil
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -77,17 +77,21 @@ class Link_img(db.Model):
     def __repr__(self):
         return f'{self.id}'
 
+
 @app.route('/')
-@app.route('/<int:page>')
+@app.route('/<string:page>')
 def main(page=1):
     if current_user.is_authenticated:
         user_status = str(current_user.status)
     else:
         user_status = None
-    
+    if request.cookies.get('sort') == 'decrease' or not request.cookies.get('sort'):
+        posts=Post.query.order_by(Post.id.desc()).paginate(int(page), 20)
+    else:
+        posts=Post.query.paginate(int(page), 20)
     return render_template('main.html',
                                 user_status=user_status, 
-                                posts=Post.query.paginate(page, 20),
+                                posts=posts,
                                 autoriz=current_user.is_authenticated,
                                 current_user=str(current_user),
                                 favorites=False,)
@@ -151,7 +155,11 @@ def post(post_id):
 def favorites_posts(page=1):
     favorites_post_id = db.session.query(Favorites).filter(Favorites.user_email==str(current_user)).all()
     favorites_post_id = [int(i.post_id) for i in favorites_post_id]
-    posts = db.session.query(Post).filter(Post.id.in_(favorites_post_id)).paginate(page, 20)
+    
+    if request.cookies.get('sort') == 'decrease' or not request.cookies.get('sort'):
+        posts = db.session.query(Post).filter(Post.id.in_(favorites_post_id)).order_by(Post.id.desc()).paginate(page, 20)
+    else:
+        posts = db.session.query(Post).filter(Post.id.in_(favorites_post_id)).paginate(page, 20)
     return render_template('main.html', 
                             posts=posts, 
                             autoriz=current_user.is_authenticated,
@@ -328,7 +336,7 @@ def delete_img(img):
 def favorites(post_id):
     favorit = db.session.query(Favorites).filter(Favorites.post_id==post_id,
                                                  Favorites.user_email==str(current_user)).all()
-    if not favorit: # добавление в избранное если отсуствует, иначе - удаление с избр.
+    if not favorit:                  # добавление в избранное если отсуствует, иначе - удаление с избр.
         try:
             f = Favorites(post_id=post_id, user_email=str(current_user))
             viwe = Post.query.get(post_id)
@@ -427,6 +435,22 @@ def admin_panel(user_id = None):
                             user_status=str(current_user.status),
                             autoriz=current_user.is_authenticated,)
 
+@app.route('/sort/<string:slug>')
+def sort_posts(slug=None):
+    if slug:
+        slug_split = slug.split('-')
+        if slug_split[1] == 'main':
+            resp = make_response(redirect(url_for('main')))
+        else:
+            resp = make_response(redirect(url_for('favorites_posts')))
+        if slug_split[0] == 'increase':
+            resp.set_cookie('sort', 'increase')
+        elif slug_split[0] == 'decrease':
+            resp.set_cookie('sort', 'decrease')
+        else:
+            return redirect(url_for('main'))
+        return resp
+   
 
 if __name__ == "__main__":
     app.run(debug=True)
