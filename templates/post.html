@@ -17,15 +17,15 @@
     {% if autoriz %}
     {% if user_favorite %}
     <a class='add_favorite' href="{{ favorites_link }}">
-      <img src="static/images/img/heart-3.png" class='leftimg'>
+      <img src="{{url_for('static', filename='/images/img/heart-31.png')}}" class='leftimg'>
     </a>
     {% else %}
     <a href="{{ favorites_link }}">
-      <img src="static/images/img/heart-4.png" class='leftimg'>
+      <img src="{{url_for('static', filename='/images/img/heart-4.png')}}" class='leftimg'>
     </a>
     {% endif %}
     {% else %}
-    <span data-tooltip="Что бы добавть в избранное нужно авторизоваться"><img src="static/images/img/heart-4.png"
+    <span data-tooltip="Что бы добавть в избранное нужно авторизоваться"><img src="{{url_for('static', filename='/images/img/heart-4.png')}}"
         class='leftimg'></span>
     {% endif %}
     {% if count_favorite > 0 %}
@@ -33,7 +33,7 @@
     {% else %}
     &nbsp
     {%endif%}
-    <div class='rightimg'>{{ post.views }} <img src="static/images/img/view.png"></div>
+    <div class='rightimg'>{{ post.views }} <img src="{{url_for('static', filename='/images/img/view.png')}}"></div>
     <h3>{{ post.title }}</h3>
     <p>{{ post.content }}</p>
     <!-- карусель изображений -->

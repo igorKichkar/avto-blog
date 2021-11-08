@@ -77,21 +77,27 @@ class Link_img(db.Model):
     def __repr__(self):
         return f'{self.id}'
 
-
 @app.route('/')
-@app.route('/<int:post_id>', methods=['get', 'post'])
-def main(post_id=None):
+@app.route('/<int:page>')
+def main(page=1):
     if current_user.is_authenticated:
         user_status = str(current_user.status)
     else:
         user_status = None
-    if not post_id:
-        return render_template('main.html',
+    
+    return render_template('main.html',
                                 user_status=user_status, 
-                                posts=Post.query.all(), 
+                                posts=Post.query.paginate(page, 20),
                                 autoriz=current_user.is_authenticated,
-                                current_user=str(current_user),)
-    else:
+                                current_user=str(current_user),
+                                favorites=False,)
+
+@app.route('/post/<int:post_id>', methods=['get', 'post'])
+def post(post_id):
+        if current_user.is_authenticated:
+            user_status = str(current_user.status)
+        else:
+            user_status = None
         post_dir = 'static/images'+ '/' + str(post_id)
         links_img = db.session.query(Link_img).filter(Link_img.post_id==post_id).all()
         count_favorite = len(db.session.query(Favorites).filter(Favorites.post_id==post_id).all())
@@ -125,7 +131,7 @@ def main(post_id=None):
             except:
                 db.session.rollback()
                 flash("Ошибка добавления")
-            return redirect(f'/{post_id}')
+            return redirect(f'/post/{post_id}')
         return render_template('post.html',
                                post=Post.query.filter(Post.id == post_id).first(),
                                post_id=post_id,
@@ -140,19 +146,18 @@ def main(post_id=None):
                                user_status=user_status,
                                current_user = str(current_user),)
 
-
 @app.route('/favorites_posts')
-def favorites_posts():
-    posts =[]
+@app.route('/favorites_posts/<int:page>')
+def favorites_posts(page=1):
     favorites_post_id = db.session.query(Favorites).filter(Favorites.user_email==str(current_user)).all()
-    favorites_post_id = [i.post_id for i in favorites_post_id]
-    for i in favorites_post_id:
-        posts.append(Post.query.get(i))
+    favorites_post_id = [int(i.post_id) for i in favorites_post_id]
+    posts = db.session.query(Post).filter(Post.id.in_(favorites_post_id)).paginate(page, 20)
     return render_template('main.html', 
                             posts=posts, 
                             autoriz=current_user.is_authenticated,
                             current_user = str(current_user),
-                            user_status=str(current_user.status),)
+                            user_status=str(current_user.status),
+                            favorites=True,)
 
 
 @app.route('/add-post/', methods=['get', 'post'])
@@ -161,24 +166,25 @@ def add_post(slug=None):
     flag = False
     form = PostForm()
     if slug == 'random':
-        data_post = create_random_post()
-        try:
-            p = Post(title=data_post[0],
-                    content=data_post[1],
-                    author=str(current_user), )
-            db.session.add(p)
-            db.session.commit()
-            if data_post[2]:
-                for i in data_post[2]:
-                    l = Link_img(link=i,
-                                 post_id=Post.query.order_by(Post.id.desc())[0].id)
-                    db.session.add(l)
-                    db.session.commit()
-            flash("Статья добавлена")
-        except:
-            db.session.rollback()
-            flash("Ошибка добавления")
-        return redirect(f'/{str(Post.query.order_by(Post.id.desc())[0].id)}')
+        for i in range(100):
+            data_post = create_random_post() # добавление случайной статьи с википедии
+            try:
+                p = Post(title=data_post[0],
+                        content=data_post[1],
+                        author=str(current_user), )
+                db.session.add(p)
+                db.session.commit()
+                if data_post[2]:
+                    for i in data_post[2]:
+                        l = Link_img(link=i,
+                                    post_id=Post.query.order_by(Post.id.desc())[0].id)
+                        db.session.add(l)
+                        db.session.commit()
+                flash("Статья добавлена")
+            except:
+                db.session.rollback()
+                flash("Ошибка добавления")
+        return redirect(f'/post/{str(Post.query.order_by(Post.id.desc())[0].id)}')
     else:
         if form.validate_on_submit():     # обавление  поста в БД
             try:
@@ -202,7 +208,7 @@ def add_post(slug=None):
                 for file in files:
                         filename = file.filename
                         file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
-            return redirect(f'/{str(Post.query.order_by(Post.id.desc())[0].id)}')
+            return redirect(f'/post/{str(Post.query.order_by(Post.id.desc())[0].id)}')
     return render_template('add_post.html',
                            form=form,
                            edit_post=False,
@@ -247,7 +253,7 @@ def edit(post_id):
                 for file in files:
                     filename = file.filename
                     file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
-        return redirect(f'/{post_id}')
+        return redirect(f'/post/{post_id}')
     return render_template('add_post.html',
                            form=form,
                            post_id=post_id,
@@ -343,7 +349,7 @@ def favorites(post_id):
             db.session.commit()
         except:
             db.session.rollback()
-    return redirect(url_for('main', post_id = post_id))
+    return redirect(url_for('post', post_id = post_id))
 
 
 @app.route("/register/", methods=("POST", "GET"))

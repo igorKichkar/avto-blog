@@ -2,10 +2,10 @@
 
 {% block content %}
 
-{% for i in posts[::-1] %}
+{% for i in posts.items %}
 <div class='row'>
     <div class="col-12 col-sm-10 col-lg-8 post">
-        <a class='title_post' href="{{ i.id }}">
+        <a class='title_post' href="{{ url_for('post', post_id=i.id) }}">
             <h3>{{ i.title }}</h3>
         </a>
         <br>
@@ -14,7 +14,7 @@
         {% else %}
         <p>{{ i.content }}
             {% endif %}
-        <p class='rightimg'>{{ i.views }} <img src="static/images/img/view.png"></p>
+        <p class='rightimg'>{{ i.views }} <img src="{{url_for('static', filename='/images/img/view.png')}}"></p>
         <p class='created_on'>{{ (i.created_on | string)[:16]}}</p>
         {% if user_status == 'admin' or i.author == current_user %}
         {% set edit_link = '/edit/' + i.id|string %}
@@ -23,4 +23,31 @@
     </div>
 </div>
 {% endfor %}
+    {% if favorites %}
+    {% set endpoint = 'favorites_posts' %}
+    {% else %}
+    {% set endpoint = 'main' %}
+    {% endif %}
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      {% if posts.has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for(endpoint, page=posts.prev_num) }}" tabindex="-1">Назад</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <a class="page-link" href="#" tabindex="-1">Назад</a>
+      </li>
+      {% endif %}
+      {% if posts.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for(endpoint, page=posts.next_num) }}">Загрузить еще</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <a class="page-link" href="#">Загрузить еще</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
 {% endblock %}

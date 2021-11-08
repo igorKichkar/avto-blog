@@ -126,3 +126,8 @@
       width: 250px;
       padding: 10px;
   }
+
+  .pagination{
+        margin: auto;
+        padding: 20px;
+  }
