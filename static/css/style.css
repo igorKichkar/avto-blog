@@ -74,12 +74,9 @@
     font-size: 85%;
     font-style: italic;
     color: rgb(180, 180, 180);
-
 }
 
 .comment{
-    
-   
     border-top: 1px solid rgb(216, 216, 216);
     margin-top: 5px;
     margin: 5px 0 0 0 ;
@@ -133,5 +130,5 @@
   }
 
   .sort{
-      margin: 10px auto auto auto;
+      margin: 10px auto 0 auto;
   }

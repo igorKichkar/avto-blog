@@ -94,7 +94,7 @@ def main(page=1):
                                 posts=posts,
                                 autoriz=current_user.is_authenticated,
                                 current_user=str(current_user),
-                                favorites=False,)
+                                flag='main',)
 
 @app.route('/post/<int:post_id>', methods=['get', 'post'])
 def post(post_id):
@@ -149,23 +149,6 @@ def post(post_id):
                                user_favorite=user_favorite,
                                user_status=user_status,
                                current_user = str(current_user),)
-
-@app.route('/favorites_posts')
-@app.route('/favorites_posts/<int:page>')
-def favorites_posts(page=1):
-    favorites_post_id = db.session.query(Favorites).filter(Favorites.user_email==str(current_user)).all()
-    favorites_post_id = [int(i.post_id) for i in favorites_post_id]
-    
-    if request.cookies.get('sort') == 'decrease' or not request.cookies.get('sort'):
-        posts = db.session.query(Post).filter(Post.id.in_(favorites_post_id)).order_by(Post.id.desc()).paginate(page, 20)
-    else:
-        posts = db.session.query(Post).filter(Post.id.in_(favorites_post_id)).paginate(page, 20)
-    return render_template('main.html', 
-                            posts=posts, 
-                            autoriz=current_user.is_authenticated,
-                            current_user = str(current_user),
-                            user_status=str(current_user.status),
-                            favorites=True,)
 
 
 @app.route('/add-post/', methods=['get', 'post'])
@@ -358,8 +341,29 @@ def favorites(post_id):
             db.session.rollback()
     return redirect(url_for('post', post_id = post_id))
 
+@app.route('/favorites_posts')
+@app.route('/favorites_posts/<int:page>')
+def favorites_posts(page=1):
+    if current_user.is_authenticated:
+        user_status = str(current_user.status)
+    else:
+        user_status = None
+    favorites_post_id = db.session.query(Favorites).filter(Favorites.user_email==str(current_user)).all()
+    favorites_post_id = [int(i.post_id) for i in favorites_post_id]
+    
+    if request.cookies.get('sort') == 'decrease' or not request.cookies.get('sort'):
+        posts = db.session.query(Post).filter(Post.id.in_(favorites_post_id)).order_by(Post.id.desc()).paginate(page, 20)
+    else:
+        posts = db.session.query(Post).filter(Post.id.in_(favorites_post_id)).paginate(page, 20)
+    return render_template('main.html', 
+                            posts=posts, 
+                            autoriz=current_user.is_authenticated,
+                            current_user = str(current_user),
+                            user_status=user_status,
+                            flag='favorites',)
 
-@app.route("/register/", methods=("POST", "GET"))
+
+@app.route("/register/", methods=["POST", "GET"])
 def register():
     form = RegistrForm()
     if form.validate_on_submit(): 
@@ -435,14 +439,18 @@ def admin_panel(user_id = None):
                             user_status=str(current_user.status),
                             autoriz=current_user.is_authenticated,)
 
-@app.route('/sort/<string:slug>')
+
+@app.route('/sort/<string:slug>') #сортировка постов для главной стр. и избранного
 def sort_posts(slug=None):
     if slug:
         slug_split = slug.split('-')
         if slug_split[1] == 'main':
             resp = make_response(redirect(url_for('main')))
-        else:
+        elif slug_split[1] == 'favorites':
             resp = make_response(redirect(url_for('favorites_posts')))
+        elif slug_split[1] == 'search':
+            resp = make_response(redirect(url_for('find_phrase')))
+
         if slug_split[0] == 'increase':
             resp.set_cookie('sort', 'increase')
         elif slug_split[0] == 'decrease':
@@ -450,6 +458,37 @@ def sort_posts(slug=None):
         else:
             return redirect(url_for('main'))
         return resp
+    
+
+@app.route('/search')
+@app.route('/search/<int:page>')
+def find_phrase(page=1):         # большая часть кода необходима для работы пагинации и сортировки
+    posts = []
+    if current_user.is_authenticated:
+        user_status = str(current_user.status)
+    else:
+        user_status = None
+    if request.args.get("search_prase"):
+        req = request.args.get("search_prase")
+    else:
+        req = request.cookies.get('serch_prase')
+    for i in db.session.query(Post).all():
+        if req.lower() in i.title.lower() or req.lower() in i.content.lower():
+            posts.append(i)
+    post_id = [i.id for i in posts]
+    if request.cookies.get('sort') == 'decrease' or not request.cookies.get('sort'):
+        posts = db.session.query(Post).filter(Post.id.in_(post_id)).order_by(Post.id.desc()).paginate(page, 20)
+    else:
+        posts = db.session.query(Post).filter(Post.id.in_(post_id)).paginate(page, 20)
+
+    resp = make_response(render_template('main.html', 
+                            posts=posts, 
+                            autoriz=current_user.is_authenticated,
+                            current_user = str(current_user),
+                            user_status=user_status,
+                            flag='search',))
+    resp.set_cookie('serch_prase', req)
+    return resp
    
 
 if __name__ == "__main__":

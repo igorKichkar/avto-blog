@@ -4,18 +4,20 @@
 <div class='row'>
   <div class="col-12 col-sm-10 col-lg-8 sort">
     <div class="dropdown">
-      <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+      <button class="btn btn-link btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
         aria-expanded="false">
         Сортировать по дате публикации
       </button>
       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-        {% if favorites %}
-        <li><a class="dropdown-item" href="{{ url_for('sort_posts', slug='increase-favorites') }}">Сначало старые</a></li>
-        <li><a class="dropdown-item" href="{{ url_for('sort_posts', slug='decrease-favorites') }}">Новые</a></li>
-        {% else %}
-        <li><a class="dropdown-item" href="{{ url_for('sort_posts', slug='increase-main') }}">Сначало старые</a></li>
-        <li><a class="dropdown-item" href="{{ url_for('sort_posts', slug='decrease-main') }}">Новые</a></li>
+        {% if  flag == 'favorites'%}
+        {% set slug = 'favorites'%}
+        {% elif flag == 'main' %}
+        {% set slug = 'main'%}
+        {% elif flag == 'search' %}
+        {% set slug = 'search'%}
         {% endif %}
+        <li><a class="dropdown-item" href="{{ url_for('sort_posts', slug='increase-' + slug) }}">Сначало старые</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('sort_posts', slug='decrease-' + slug) }}">Новые</a></li>
       </ul>
     </div>
   </div>
@@ -42,10 +44,12 @@
   </div>
 </div>
 {% endfor %}
-{% if favorites %}
+{% if flag == 'favorites' %}
 {% set endpoint = 'favorites_posts' %}
-{% else %}
+{% elif flag == 'main' %}
 {% set endpoint = 'main' %}
+{% elif flag == 'search' %}
+{% set endpoint = 'find_phrase' %}
 {% endif %}
 <nav aria-label="Page navigation example">
   <ul class="pagination justify-content-center">

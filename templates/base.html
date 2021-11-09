@@ -37,7 +37,6 @@
                         </li>
                     </ul>
                     <ul class="nav navbar-nav  justify-content-end">
-
                         {% if not autoriz %}
                         <li class="nav-item justify-content-end">
                             <a class="nav-link" href="{{ url_for('login') }}">Войти</a>
@@ -46,17 +45,27 @@
                             <a class="nav-link" href="{{ url_for('register') }}">Регистрация</a>
                         </li>
                         {% else %}
-                            {% if user_status == 'admin' %}
-                            <li class="nav-item justify-content-end">
-                                <a class="nav-link" href="{{ url_for('admin_panel') }}">Админ-панель</a>
-                            </li>
-                            {% endif %}
+                        {% if user_status == 'admin' %}
+                        <li class="nav-item justify-content-end">
+                            <a class="nav-link" href="{{ url_for('admin_panel') }}">Админ-панель</a>
+                        </li>
+                        {% endif %}
                         <li class="nav-item justify-content-end">
                             <a class="nav-link" href="{{ url_for('logout') }}">Выйти из профиля</a>
                         </li>
                         {% endif %}
-                    </ul>
+                        <li class="nav-item justify-content-end">
+                            <form method='get' action='/search'>
+                                <div class="input-group">
+                                    <input type="search" class="form-control rounded" placeholder="Поиск по сайту"
+                                        aria-label="Searcha" aria-describedby="search-addon" type="text" name="search_prase"/>
+                                    <button type="submit" class="btn btn-primary">Найти</button>
+                                </div>
+                            </form>
                 </div>
+                </li>
+                </ul>
+            </div>
             </div>
         </nav>
     </header>
