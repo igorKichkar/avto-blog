@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row">
-    <div class="login col-10 col-sm-8 col-lg-4 alert alert-primary">
+<div class="row login">
+    <div class="login col-10 col-sm-8 col-lg-4 alert alert-primary login">
         {% for cat, msg in get_flashed_messages(True) %}
         <p class="alert alert-light">{{msg}}</p>
         {% endfor %}

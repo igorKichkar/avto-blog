@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 
 <head>
+    <meta charset="utf-8">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css">
+    <link rel="shortcut icon" href="{{url_for('static', filename='/images/img/view.png')}}">
     <title>BLOG</title>
 </head>
 
@@ -58,7 +60,8 @@
                             <form method='get' action='/search'>
                                 <div class="input-group">
                                     <input type="search" class="form-control rounded" placeholder="Поиск по сайту"
-                                        aria-label="Searcha" aria-describedby="search-addon" type="text" name="search_prase"/>
+                                        aria-label="Searcha" aria-describedby="search-addon" type="text"
+                                        name="search_prase" />
                                     <button type="submit" class="btn btn-primary">Найти</button>
                                 </div>
                             </form>
@@ -66,13 +69,18 @@
                 </li>
                 </ul>
             </div>
-            </div>
         </nav>
     </header>
-    <div class='container'>
+    <div class='container main-content'>
         {% block content %}
         {% endblock %}
     </div>
+    </div>
+    <footer class="bg-primary text-center text-lg-start">
+        <div class="text-center text-light p-3">
+            igor_kichkar@mail.ru 2021
+        </div>
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
         crossorigin="anonymous"></script>

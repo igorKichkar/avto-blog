@@ -26,12 +26,13 @@
       </div>
       {% endfor %}
       {% for i in links_img %}
-        <div>
-          <img class='edit_img' src="{{i.link}}" alt="">
-          <a class="btn btn-outline-danger" href="{{ url_for('delete_img', img=post_id + '/' + i.id|string + '/'+ 'link') }}">Удалить</a>
-        </div>
+      <div>
+        <img class='edit_img' src="{{i.link}}" alt="">
+        <a class="btn btn-outline-danger"
+          href="{{ url_for('delete_img', img=post_id + '/' + i.id|string + '/'+ 'link') }}">Удалить</a>
+      </div>
       {% endfor %}
-        {% endif %}
+      {% endif %}
       <p>{{form.upload(class="btn upload_btn widht_btn")}}</p>
       <p>{{ form.submit(class="btn btn-primary widht_btn") }}</p>
       {% if edit_post %}
@@ -61,6 +62,8 @@
     {% else %}
     <div>Чтобы добавить новую статью нужно авторизоваться</div>
     {% endif %}
+    <br>
   </div>
 </div>
+<br>
 {% endblock %}
