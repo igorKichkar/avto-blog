@@ -53,8 +53,7 @@
         <p class="coment_content">{{ i.user_name }}</p>
         <p class='created_on'>{{ (i.created_on| string)[:16] }}</p>
         <p>{{ i.coment_content }}</p>
-        {% set del_coment_link = '/delete_coment/' + i.id | string %}
-        <a class='btn btn-outline-danger' href="{{ del_coment_link }}">удалить</a>
+        <a class='btn btn-outline-danger' href="{{ url_for('delete_coment', coment_id = i.id) }}">удалить</a>
       </div>
       {% endfor %}
     </div>

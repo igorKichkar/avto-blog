@@ -2,10 +2,12 @@ import os
 import glob
 from datetime import datetime
 import shutil
+
 from flask import Flask, render_template, request, redirect, url_for, flash, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+
 from forms import PostForm, ComentForm, RegistrForm, LoginForm
 from create_random_post import create_random_post
 
@@ -79,19 +81,25 @@ class Link_img(db.Model):
         return f'{self.id}'
 
 
+def check_user_status():
+    return str(current_user.status) if current_user.is_authenticated else None
+
+def add_db(*args):
+    for i in args:
+        db.session.add(i)   
+    db.session.commit()
+            
+
+
 @app.route('/')
 @app.route('/<string:page>')
 def main(page=1):
-    if current_user.is_authenticated:
-        user_status = str(current_user.status)
-    else:
-        user_status = None
-    if request.cookies.get('sort') == 'decrease' or not request.cookies.get('sort'):
+    if request.cookies.get('sort') == 'decrease':
         posts = Post.query.order_by(Post.id.desc()).paginate(int(page), 20)
     else:
         posts = Post.query.paginate(int(page), 20)
     return render_template('main.html',
-                           user_status=user_status,
+                           user_status=str(current_user.status) if current_user.is_authenticated else None,
                            posts=posts,
                            autoriz=current_user.is_authenticated,
                            current_user=str(current_user),
@@ -100,24 +108,18 @@ def main(page=1):
 
 @app.route('/post/<int:post_id>', methods=['get', 'post'])
 def post(post_id):
-    if current_user.is_authenticated:
-        user_status = str(current_user.status)
-    else:
-        user_status = None
     post_dir = 'static/images' + '/' + str(post_id)
     links_img = db.session.query(Link_img).filter(Link_img.post_id == post_id).all()
     count_favorite = len(db.session.query(Favorites).filter(Favorites.post_id == post_id).all())
     user_favorite = db.session.query(Favorites).filter(Favorites.post_id == post_id,
                                                        Favorites.user_email == str(current_user)).all()
+    images = []
     if (os.path.exists(post_dir)):  # получение списка изображений для конкретного поста
-        images = os.listdir(post_dir)
-    else:
-        images = []
+        images = os.listdir(post_dir)   
     try:  # увеличение счетчика просмотров
         viwe = Post.query.get(post_id)
         viwe.views = viwe.views + 1
-        db.session.add(viwe)
-        db.session.commit()
+        add_db(viwe)
     except:
         db.session.rollback()
         flash("Ошибка добавления")
@@ -130,9 +132,7 @@ def post(post_id):
                          post_id=post_id, )
             viwe = Post.query.get(post_id)
             viwe.views -= 2
-            db.session.add(viwe)
-            db.session.add(com)
-            db.session.commit()
+            add_db(viwe, com)
             flash("Комментарий добавлен")
         except:
             db.session.rollback()
@@ -140,16 +140,14 @@ def post(post_id):
         return redirect(f'/post/{post_id}')
     return render_template('post.html',
                            post=Post.query.filter(Post.id == post_id).first(),
-                           post_id=post_id,
                            coments=Coment.query.filter(Coment.post_id == post_id).all(),
                            form=form,
-                           directory=str(post_id),
                            images=images,
                            links_img=links_img,
                            autoriz=current_user.is_authenticated,
                            count_favorite=count_favorite,
                            user_favorite=user_favorite,
-                           user_status=user_status,
+                           user_status=check_user_status(),
                            current_user=str(current_user), )
 
 
@@ -185,12 +183,13 @@ def add_post(slug=None):
                          author=str(current_user), )
                 db.session.add(p)
                 db.session.commit()
-                flag = True
                 flash("Статья добавлена")
             except:
                 db.session.rollback()
                 flash("Ошибка добавления")
                 return redirect(url_for('add_post'))
+            else:
+                 flag = True
         if flag:  # если данные в БД добавились, создаются каталоги и в них грузятся изображения для постов
             files = request.files.getlist('upload')
             if files[0]:
@@ -211,27 +210,26 @@ def add_post(slug=None):
 @app.route("/edit/<string:post_id>", methods=['get', 'post'])
 def edit(post_id):
     flag = False
+    post = Post.query.filter(Post.id == post_id).first()
     links_img = db.session.query(Link_img).filter(Link_img.post_id == int(post_id)).all()
     post_dir = '/' + post_id
     form = PostForm()
-    form.title.data = Post.query.filter(Post.id == post_id).first().title
-    form.content.data = Post.query.filter(Post.id == post_id).first().content
+    form.title.data = post.title
+    form.content.data = post.content
+    images = []
     if (os.path.exists('static/images' + '/' + post_id)):  # получение списка изображений для конкретного поста
-        images = os.listdir('static/images' + '/' + post_id)
-    else:
-        images = []
+        images = os.listdir('static/images' + '/' + post_id)    
     if form.validate_on_submit():
         try:
-            post = Post.query.get(post_id)
             post.title = request.form['title']
             post.content = request.form['content']
-            db.session.add(post)
-            db.session.commit()
-            flag = True
+            add_db(post)
             flash("Изменения внесены")
         except:
             db.session.rollback()
             flash("Ошибка добавления")
+        else:
+            flag = True
         if form.checkbox.data and os.path.exists('static/images' + post_dir):  # удаление прежних изобр.
             del_files = glob.glob('static/images' + post_dir + '/*')  # при редактировании поста
             for f in del_files:
@@ -252,7 +250,7 @@ def edit(post_id):
                            edit_post=True,
                            coments=Coment.query.filter(Coment.post_id == post_id).all(),
                            autoriz=current_user.is_authenticated,
-                           user_status=str(current_user.status),
+                           user_status=check_user_status(),
                            images=images,
                            links_img=links_img, )
 
@@ -273,10 +271,11 @@ def delete_post(post_id):
             db.session.delete(i)
         db.session.delete(row_to_delete)
         db.session.commit()
-        flag = True
     except:
         db.session.rollback()
         flash("Ошибка удаления")
+    else:
+        flag = True
     if flag and (os.path.exists('static/images/' + str(post_id))):  # удаление папки с изоб. к посту
         dir_path = 'static/images/' + str(post_id) + '/'
         try:
@@ -326,9 +325,7 @@ def favorites(post_id):
             f = Favorites(post_id=post_id, user_email=str(current_user))
             viwe = Post.query.get(post_id)
             viwe.views = viwe.views - 1
-            db.session.add(viwe)
-            db.session.add(f)
-            db.session.commit()
+            add_db(viwe, f)
         except:
             db.session.rollback()
             flash("Ошибка")
@@ -336,9 +333,8 @@ def favorites(post_id):
         try:
             viwe = Post.query.get(post_id)
             viwe.views = viwe.views - 1
-            db.session.add(viwe)
             db.session.delete(favorit[0])
-            db.session.commit()
+            add_db(viwe)
         except:
             db.session.rollback()
     return redirect(url_for('post', post_id=post_id))
@@ -347,10 +343,6 @@ def favorites(post_id):
 @app.route('/favorites_posts')
 @app.route('/favorites_posts/<int:page>')
 def favorites_posts(page=1):
-    if current_user.is_authenticated:
-        user_status = str(current_user.status)
-    else:
-        user_status = None
     favorites_post_id = db.session.query(Favorites).filter(Favorites.user_email == str(current_user)).all()
     favorites_post_id = [int(i.post_id) for i in favorites_post_id]
 
@@ -363,7 +355,7 @@ def favorites_posts(page=1):
                            posts=posts,
                            autoriz=current_user.is_authenticated,
                            current_user=str(current_user),
-                           user_status=user_status,
+                           user_status=check_user_status(),
                            flag='favorites', )
 
 
@@ -377,8 +369,7 @@ def register():
                 u = Users(user_name=request.form['user_name'],
                           email=request.form['email'],
                           psw=hash, )
-                db.session.add(u)
-                db.session.commit()
+                add_db(u)
                 return redirect(url_for('login'))
             except:
                 db.session.rollback()
@@ -427,8 +418,8 @@ def admin_panel(user_id=None):
         else:
             user.status = 'admin'
         try:
-            db.session.add(user)
-            db.session.commit()
+            add_db(user)
+            flash('Статус изменен')
         except:
             db.session.rollback()
             flash("Ошибка")
@@ -440,7 +431,7 @@ def admin_panel(user_id=None):
         return render_template('admin_panel.html',
                                users=Users.query.all(),
                                current_user=str(current_user),
-                               user_status=str(current_user.status),
+                               user_status=check_user_status(),
                                autoriz=current_user.is_authenticated, )
 
 
@@ -468,10 +459,6 @@ def sort_posts(slug=None):
 @app.route('/search/<int:page>')
 def find_phrase(page=1):  # большая часть кода необходима для работы пагинации и сортировки
     posts = []
-    if current_user.is_authenticated:
-        user_status = str(current_user.status)
-    else:
-        user_status = None
     if request.args.get("search_prase"):
         req = request.args.get("search_prase")
     else:
@@ -489,7 +476,7 @@ def find_phrase(page=1):  # большая часть кода необходи�
                                          posts=posts,
                                          autoriz=current_user.is_authenticated,
                                          current_user=str(current_user),
-                                         user_status=user_status,
+                                         user_status=check_user_status(),
                                          flag='search', ))
     resp.set_cookie('serch_prase', req)
     return resp

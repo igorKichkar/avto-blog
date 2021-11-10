@@ -13,7 +13,7 @@
     <a href="{{ edit_link }} " class='btn btn-outline-primary'>Редактировать</a><br><br>
     {% endif %}
     <p class='created_on'>{{ (post.created_on | string)[:16] }}</p>
-    {% set favorites_link = '/favorites/' + post_id | string %}
+    {% set favorites_link = '/favorites/' + post.id | string %}
     {% if autoriz %}
     {% if user_favorite %}
     <a class='add_favorite' href="{{ favorites_link }}">
@@ -43,7 +43,7 @@
         <!--первыми грузятся статические изображения, затем ссылки на изображения-->
         {% if images %}
         {% for i in images %}
-        {% set img = 'images/' + directory + '/' + i %}
+        {% set img = 'images/' + post.id|string + '/' + i %}
         {%if i == images[0] %}
         <div class="carousel-item active">
           <img src="{{url_for('static', filename=img)}}" class="d-block w-100">
@@ -90,7 +90,7 @@
         </div>
         <!--если пост имеет только одно изображение, то карусель не подключается-->
         {% elif images%}
-        {% set img = 'images/' + directory + '/' + images[0] %}
+        {% set img = 'images/' + post.id|string + '/' + images[0] %}
         <img src="{{url_for('static', filename=img)}}" class="d-block w-100">
 
         {% elif links_img %}
@@ -111,7 +111,6 @@
         {% endif %}
         {% if coments %}
         <h5>Комментарии:</h5>
-        {% endif %}
         <div class='row'>
           {% for i in coments %}
           <div class="col-12 comment">
@@ -120,6 +119,7 @@
             <p>{{ i.coment_content }}</p>
           </div>
           {% endfor %}
+          {% endif %}
         </div>
       </div>
     </div>
