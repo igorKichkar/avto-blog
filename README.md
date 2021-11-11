@@ -1,5 +1,5 @@
 <h1 align="center">Avto-blog</h1>.
-## The project was created based on the Flask framework.
+<h2>The project was created based on the Flask framework.</h2>
 
 ### Users can:
 - Register on the site.
