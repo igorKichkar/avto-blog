@@ -1,7 +1,7 @@
 <h2 align="center">Avto-blog</h2>.
-The project was created based on the Flask framework.
+## The project was created based on the Flask framework.
 
-###Users can:
+### Users can:
 - Register on the site.
 - Add post (with pictures). 
 - Edit, delete posts (only own).
@@ -10,7 +10,7 @@ The project was created based on the Flask framework.
 - Search posts using the search bar.
 - Sort posts by date added
 
-###The administrator can:
+### The administrator can:
 - Edit, delete any post.
 - Delete comments.
 - Give administrator rights to another user.
@@ -21,18 +21,18 @@ The project was created based on the Flask framework.
 - Pageview counter
 - Favorites counter
 
-###When creating a blog, the following were used:
+### When creating a blog, the following were used:
 -Flask framework
 -Sqlite database
 -SQLAlchemy ORM
 -Flask-WTF for creating forms on pages.
 -BeautifulSoup - parser for adding random posts from Wikipedia
 
-###To get administrator rights enter 
+### To get administrator rights enter 
 login: admin@m.com 
 password: 1
 
-Screenshots:
+### Screenshots:
 <p align="center">
 <img  src="./readme_assets/0.png" width="80%">
 </p>
