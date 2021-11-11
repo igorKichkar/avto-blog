@@ -21,12 +21,13 @@
 - Pageview counter
 - Favorites counter
 
-### When creating a blog, the following were used:
--Flask framework
--Sqlite database
--SQLAlchemy ORM
--Flask-WTF for creating forms on pages.
--BeautifulSoup - parser for adding random posts from Wikipedia
+### When creating a avto-blog, the following were used:
+- Flask framework
+- Sqlite database
+- SQLAlchemy ORM
+- Flask-WTF.
+- Flask_login
+- BeautifulSoup.
 
 ### To get administrator rights enter 
 <p>login: admin@m.com</p> 
