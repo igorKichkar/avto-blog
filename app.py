@@ -37,7 +37,7 @@ def main(page=1):
                            user_status=current_user.status if current_user.is_authenticated else None,
                            posts=posts,
                            autoriz=current_user.is_authenticated,
-                           current_user=current_user.user_name,
+                           current_user=current_user.user_name if current_user.is_authenticated else None,
                            flag='main', )
 
 
@@ -82,7 +82,7 @@ def post(post_id):
                            count_favorite=count_favorite,
                            user_favorite=user_favorite,
                            user_status=check_user_status(current_user),
-                           current_user=current_user.user_name
+                           current_user=current_user.user_name if current_user.is_authenticated else None,
                            )
 
 
