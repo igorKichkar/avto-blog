@@ -49,8 +49,8 @@ python3 app.py
 ```
 
 ### To get administrator rights:
-<p>Login: admin@m.com</p> 
-<p>Password: 1</p>
+<p><b>Login: admin@m.com</b></p> 
+<p><b>Password: 1</b></p>
 
 ### Screenshots:
 <p align="center">
