@@ -48,9 +48,9 @@ pip3 install -r requirements.txt
 python3 app.py
 ```
 
-### To get administrator rights enter 
-<p>login: admin@m.com</p> 
-<p>password: 1</p>
+### To get administrator rights:
+<p>Login: admin@m.com</p> 
+<p>Password: 1</p>
 
 ### Screenshots:
 <p align="center">
