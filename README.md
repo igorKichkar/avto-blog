@@ -1,5 +1,5 @@
-<h2 align="center">Avto-blog</h2>.
-## The project was created based on the Flask framework.
+<h1 align="center">Avto-blog</h1>.
+<h2>The project was created based on the Flask framework.</h2>
 
 ### Users can:
 - Register on the site.
@@ -16,7 +16,7 @@
 - Give administrator rights to another user.
 - Add a random article from Wikipedia.
 
-###The site supports:
+### The site supports:
 - Page pagination
 - Pageview counter
 - Favorites counter
@@ -29,8 +29,8 @@
 -BeautifulSoup - parser for adding random posts from Wikipedia
 
 ### To get administrator rights enter 
-login: admin@m.com 
-password: 1
+<p>login: admin@m.com</p> 
+<p>password: 1</p>
 
 ### Screenshots:
 <p align="center">
