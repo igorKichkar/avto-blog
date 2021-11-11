@@ -1,5 +1,5 @@
 <h1 align="center">Avto-blog</h1>.
-<h2>The project was created based on the Flask framework.</h2>
+## The project was created based on the Flask framework.
 
 ### Users can:
 - Register on the site.
@@ -28,6 +28,25 @@
 - Flask-WTF.
 - Flask_login
 - BeautifulSoup.
+
+### To start the server, you need to:
+- Clone the repository avto-blog.
+- Set the virtual environment in the project folder
+```
+python3 -m venv .venv
+```
+- Activate virtual environment
+```
+source .venv/bin/activate
+```
+- Install requirements
+```
+pip3 install -r requirements.txt
+```
+- Start the server
+```
+python3 app.py
+```
 
 ### To get administrator rights enter 
 <p>login: admin@m.com</p> 
