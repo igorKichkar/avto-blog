@@ -37,7 +37,7 @@ def main(page=1):
                            user_status=current_user.status if current_user.is_authenticated else None,
                            posts=posts,
                            autoriz=current_user.is_authenticated,
-                           current_user=current_user.user_name if current_user.is_authenticated else None,
+                           current_user=str(current_user) if current_user.is_authenticated else None,
                            flag='main', )
 
 
@@ -82,7 +82,7 @@ def post(post_id):
                            count_favorite=count_favorite,
                            user_favorite=user_favorite,
                            user_status=check_user_status(current_user),
-                           current_user=current_user.user_name if current_user.is_authenticated else None,
+                           current_user=str(current_user) if current_user.is_authenticated else None,
                            )
 
 
@@ -221,15 +221,13 @@ def delete_post(post_id):
 @app.route('/delete_coment/<int:coment_id>')
 def delete_coment(coment_id):
     row_to_delete = db.session.query(Coment).filter(Coment.id == int(coment_id)).one()
-    edit_post_id = row_to_delete.post_id
-
     try:
         db.session.delete(row_to_delete)
         db.session.commit()
     except Exception:
         db.session.rollback()
         flash("Ошибка удаления")
-    return redirect(url_for('edit', post_id=edit_post_id))
+    return redirect(request.referrer)
 
 
 @app.route('/delete_img/<path:img>')  # удаление конкретного изображения при редактировании поста
@@ -377,10 +375,11 @@ def admin_panel(user_id=None):
         return redirect(url_for('admin_panel'))
 
 
+@app.route('/sort/')
 @app.route('/sort/<string:slug>')  # сортировка постов для главной стр. и избранного
 def sort_posts(slug=None):
-    if slug:
-        slug_split = slug.split('-')
+    slug_split = slug.split('-') if slug else []
+    if len(slug_split) == 2 :
         if slug_split[1] == 'main':
             resp = make_response(redirect(url_for('main')))
         elif slug_split[1] == 'favorites':
@@ -392,9 +391,9 @@ def sort_posts(slug=None):
             resp.set_cookie('sort', 'increase')
         elif slug_split[0] == 'decrease':
             resp.set_cookie('sort', 'decrease')
-        else:
-            return redirect(url_for('main'))
         return resp
+    else:
+        return redirect(url_for('main'))
 
 
 @app.route('/search')
