@@ -8,7 +8,7 @@
 - Add comments.
 - Add posts to favorites.
 - Search posts using the search bar.
-- Sort posts by date added
+- Sort posts by date added.
 
 ### The administrator can:
 - Edit, delete any post.
@@ -17,33 +17,33 @@
 - Add a random article from Wikipedia.
 
 ### The site supports:
-- Page pagination
-- Pageview counter
-- Favorites counter
+- Page pagination.
+- Pageview counter.
+- Favorites counter.
 
 ### When creating a avto-blog, the following were used:
-- Flask framework
-- Sqlite database
-- SQLAlchemy ORM
+- Flask framework.
+- Sqlite database.
+- SQLAlchemy ORM.
 - Flask-WTF.
-- Flask_login
+- Flask_login.
 - BeautifulSoup.
 
 ### To start the server, you need to:
 - Clone the repository avto-blog.
-- Set the virtual environment in the project folder
+- Set the virtual environment in the project folder:
 ```
 python3 -m venv .venv
 ```
-- Activate virtual environment
+- Activate virtual environment:
 ```
 source .venv/bin/activate
 ```
-- Install requirements
+- Install requirements:
 ```
 pip3 install -r requirements.txt
 ```
-- Start the server
+- Start the server:
 ```
 python3 app.py
 ```
